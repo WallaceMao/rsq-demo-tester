@@ -1,16 +1,16 @@
 # grails(2.5.x) test demo
  
-## grails unit test（单元测试）
+## 1 grails unit test（单元测试）
 grails单元测试是针对编写的单个类方法进行测试，其所依赖的其他domain/service等需要使用Mock来模拟
 grails单元测试一般由开发人员编写，对单个业务逻辑复杂的类进行
 
-## grails integration test（集成测试）
+## 2 grails integration test（集成测试）
 grails集成测试是模拟grails的context环境，使用spock进行测试，测试用例所依赖的domain/service等均可以正常使用，不再需要mock
 grails集成测试一般由开发人员编写，对于依赖较多的controller和service，使用单元测试比较麻烦，可以直接进行集成测试
 
 ### 基本配置
 
-## grails functional test（功能测试）
+## 3 grails functional test（功能测试）
 grails功能测试是在grails的环境下启动functional test。使用Geb-spock的集成测试框架进行。
 
 ### 依赖
