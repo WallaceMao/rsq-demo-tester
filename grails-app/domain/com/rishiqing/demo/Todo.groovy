@@ -4,9 +4,9 @@ class Todo {
 
     String title
     Boolean isDone = false
-    Date doneTime
+    Long doneTime
     Boolean isDeleted = false
-    Date deletedTime
+    Long deletedTime
 
     Date dateCreated
     Date lastUpdated
@@ -18,11 +18,12 @@ class Todo {
 
     Map toMap(){
         return [
+                id: id,
                 title: title,
                 isDone: isDone,
-                doneTime: doneTime?.getTime(),
+                doneTime: doneTime,
                 isDeleted: isDeleted,
-                deletedTime: deletedTime?.getTime()
+                deletedTime: deletedTime
         ]
     }
 }

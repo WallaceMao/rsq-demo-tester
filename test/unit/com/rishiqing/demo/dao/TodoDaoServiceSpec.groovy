@@ -1,5 +1,6 @@
-package com.rishiqing.demo
+package com.rishiqing.demo.dao
 
+import com.rishiqing.demo.Todo
 import com.rishiqing.demo.dao.TodoDaoService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -9,7 +10,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 /**
- * See the API for {@link grails.test.mixin.services.ServiceUnitTestMixin} for usage instructions
+ * TodoDaoService的单元测试
  */
 @TestFor(TodoDaoService)
 @Mock(Todo)
@@ -57,7 +58,7 @@ class TodoDaoServiceSpec extends Specification {
         given:
         Date now = new Date()
         def (newTitle, newIsDone, newDoneTime, newIsDeleted, newDeletedTime) =
-        ['bbbbbb', true, now, true, now]
+        ['bbbbbb', true, now.getTime(), true, now.getTime()]
         String strTitle = 'aaaaaa'
         Todo newTodo = new Todo(title: strTitle)
         service.saveOrUpdate(newTodo)

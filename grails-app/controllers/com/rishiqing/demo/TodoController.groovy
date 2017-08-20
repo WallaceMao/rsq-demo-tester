@@ -9,7 +9,7 @@ class TodoController {
         def m
         try {
             List list = todoService.getList()
-            m = [errcode: 0, result: list*.toMap()]
+            m = [errcode: 0, result: list]
         }catch (Exception e){
             m = [errcode: 1]
         }

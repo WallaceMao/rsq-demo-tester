@@ -8,7 +8,7 @@ class TodoDaoService {
 
     Todo saveOrUpdate(Todo todo) {
         todo.save(failOnError: true)
-        return todo
+        todo
     }
 
     Todo remove(Todo todo){
@@ -17,14 +17,14 @@ class TodoDaoService {
         }
         todo.isDeleted = true
         todo.save(failOnError: true)
-        return todo
+        todo
     }
 
     List getTodoList(){
-        return Todo.findAllByIsDeleted(false)
+        Todo.findAllByIsDeleted(false)
     }
 
     Todo getTodoById(long id){
-        return Todo.findByIdAndIsDeleted(id, false)
+        Todo.findById(id)
     }
 }
