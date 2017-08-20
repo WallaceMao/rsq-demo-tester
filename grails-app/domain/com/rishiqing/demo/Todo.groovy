@@ -3,18 +3,13 @@ package com.rishiqing.demo
 class Todo {
 
     String title
-    Boolean isDone
+    Boolean isDone = false
     Date doneTime
-    Boolean isDeleted
+    Boolean isDeleted = false
     Date deletedTime
 
     Date dateCreated
     Date lastUpdated
-
-    static mapping = {
-        isDone defaultValue: false
-        isDeleted defaultValue: false
-    }
 
     static constraints = {
         doneTime nullable: true

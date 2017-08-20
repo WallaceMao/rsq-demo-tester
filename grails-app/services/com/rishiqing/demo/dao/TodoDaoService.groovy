@@ -12,6 +12,9 @@ class TodoDaoService {
     }
 
     Todo remove(Todo todo){
+        if(!todo.id){
+            return null
+        }
         todo.isDeleted = true
         todo.save(failOnError: true)
         return todo
@@ -23,13 +26,5 @@ class TodoDaoService {
 
     Todo getTodoById(long id){
         return Todo.findByIdAndIsDeleted(id, false)
-    }
-
-    Todo findTodoListWhere(Map params){
-        return Todo.findWhere(params)
-    }
-
-    List findAllTodoListWhere(Map params){
-        return Todo.findAllWhere(params)
     }
 }
