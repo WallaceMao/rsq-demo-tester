@@ -12,6 +12,7 @@ class TodoController {
         def m
         try {
             List list = todoService.getTodoMapList()
+            Thread.sleep(1000)
             m = [errcode: 0, result: list]
         }catch (Exception e){
             log.error(e)
@@ -26,7 +27,6 @@ class TodoController {
             def jsonSlurper = new JsonSlurper()
             JSONObject json = request.JSON
             Map params = (Map)jsonSlurper.parseText(json.toString())
-            println "======params:${params}"
             Map result = todoService.saveOrUpdateTodo(params)
             m = [errcode: 0, result: result]
         }catch (Exception e){
@@ -49,21 +49,5 @@ class TodoController {
             m = [errcode: 1]
         }
         render m as JSON
-    }
-
-    def saveTodoList() {
-        def m
-        try {
-            JSONObject json = request.JSON
-            def jsonSlurper = new JsonSlurper()
-            List paramList = (List)jsonSlurper.parseText(json.getJSONArray('list').toString())
-            List list = todoService.saveList(paramList)
-            m = [errcode: 0, result: list]
-        }catch (Exception e){
-            log.error(e)
-            m = [errcode: 1]
-        }
-        render m as JSON
-
     }
 }

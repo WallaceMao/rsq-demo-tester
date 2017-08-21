@@ -14,8 +14,9 @@ class TodoAppPage extends Page {
         $('section.todoapp')
     }
     static content = {
-        newInput(wait: true, required: true) { $('input.new-todo') }
-        todoList() { $('ul.todo-list li') }
+        newInput(wait: 2, required: true) { $('input.new-todo') }
+//        todoUl(wait: true, required: true) {$('ul.todo-list')}
+        todoList() { $('ul.todo-list') }
     }
 
     def createTodo(String str){

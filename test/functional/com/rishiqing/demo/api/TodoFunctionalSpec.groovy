@@ -45,36 +45,6 @@ class TodoFunctionalSpec extends GebSpec {
         resp.json.errcode == 0
     }
 
-    def "test save todo list"(){
-        when:
-        Map params = [
-                list: [
-                        [title: '11111'],
-                        [title: '22222']
-                ]
-        ]
-        RsqRestResponse resp = RsqRestUtil.postJSON("${baseUrl}${path}todo/saveTodoList"){
-            fields params
-        }
-
-        then:
-        resp.status == 200
-        resp.json.errcode == 0
-        resp.json.result != null
-        resp.json.result[0].id != null
-        resp.json.result[0].title == '11111'
-        resp.json.result[1].id != null
-        resp.json.result[1].title == '22222'
-
-        when:
-        resp = RsqRestUtil.get("${baseUrl}${path}todo/fetchTodoList"){}
-
-        then:
-        resp.status == 200
-        resp.json.errcode == 0
-        resp.json.result.size() == 2
-    }
-
     def "test save new todo"(){
         when:
         String title = "new Todo ${new Date()}"
@@ -98,8 +68,8 @@ class TodoFunctionalSpec extends GebSpec {
         then:
         resp.status == 200
         resp.json.errcode == 0
-        resp.json.result.size() == 3
-        resp.json.result[2].title == title
+        resp.json.result.size() == orgListSize + 1
+        resp.json.result[-1].title == title
     }
 
     def "test update todo"(){
@@ -125,8 +95,8 @@ class TodoFunctionalSpec extends GebSpec {
         then:
         resp.status == 200
         resp.json.errcode == 0
-        resp.json.result.size() == 3
-        resp.json.result[2].title == title
+        resp.json.result.size() == orgListSize + 1
+        resp.json.result[-1].title == title
     }
 
     def "test remove todo"(){
@@ -149,6 +119,6 @@ class TodoFunctionalSpec extends GebSpec {
         then:
         resp.status == 200
         resp.json.errcode == 0
-        resp.json.result.size() == 2
+        resp.json.result.size() == orgListSize
     }
 }

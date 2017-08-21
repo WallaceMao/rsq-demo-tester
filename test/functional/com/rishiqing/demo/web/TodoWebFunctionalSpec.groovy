@@ -26,16 +26,19 @@ class TodoWebFunctionalSpec extends GebSpec {
 
         then:
         waitFor(2){
-            todoList[-1].$('.view label').text() == todoTitle
+            todoList.$('li')[-1].$('.view label').text() == todoTitle
         }
     }
 
     def "test edit todo"(){
         when: 'go to app page'
         to TodoAppPage
+        waitFor(2){
+            todoList.$('li').size() > 0
+        }
 
         and: 'define variables'
-        def lastTodo = todoList[-1]
+        def lastTodo = todoList.$('li')[-1]
         def lastTodoLabel = lastTodo.$('.view label')
         def lastTodoEdit = lastTodo.$('.edit')
 
@@ -50,7 +53,7 @@ class TodoWebFunctionalSpec extends GebSpec {
         lastTodoEdit << Keys.ENTER
 
         then:
-        waitFor(2){
+        waitFor(3){
             lastTodoLabel.text() == "$todoTitle$todoTitle2"
         }
     }
@@ -58,9 +61,12 @@ class TodoWebFunctionalSpec extends GebSpec {
     def "test check todo"(){
         when: 'go to app page'
         to TodoAppPage
+        waitFor(2){
+            todoList.$('li').size() > 0
+        }
 
         and: 'define variables'
-        def lastTodo = todoList[-1]
+        def lastTodo = todoList.$('li')[-1]
         def lastTodoLabel = lastTodo.$('.view label')
         def lastTodoCheckout = lastTodo.$('.view input.toggle')
 
@@ -77,10 +83,13 @@ class TodoWebFunctionalSpec extends GebSpec {
     def "test delete todo"(){
         when: 'go to app page'
         to TodoAppPage
+        waitFor(2){
+            todoList.$('li').size() > 0
+        }
 
         and: 'define variables'
-        def lastTodo = todoList[-1]
-        long oldSize = todoList.size()
+        def lastTodo = todoList.$('li')[-1]
+        long oldSize = todoList.$('li').size()
         def lastTodoDelete = lastTodo.$('.view button.destroy')
 
 
@@ -90,7 +99,7 @@ class TodoWebFunctionalSpec extends GebSpec {
 
         then:
         waitFor(2){
-            todoList.size() == oldSize - 1
+            todoList.$('li').size() == oldSize - 1
         }
     }
 }
