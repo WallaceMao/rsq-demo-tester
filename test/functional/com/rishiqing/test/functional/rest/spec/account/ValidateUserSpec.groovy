@@ -4,12 +4,14 @@ import com.rishiqing.test.functional.util.ConfigUtil
 import com.rishiqing.test.functional.util.http.RsqRestResponse
 import com.rishiqing.test.functional.util.http.RsqRestUtil
 import geb.spock.GebSpec
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Unroll
 
 /**
  * Created by  on 2017/8/15.Wallace
  */
+@Ignore
 class ValidateUserSpec extends GebSpec {
 
     @Shared String baseUrl

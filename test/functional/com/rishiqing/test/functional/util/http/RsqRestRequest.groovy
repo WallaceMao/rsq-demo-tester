@@ -5,7 +5,7 @@ package com.rishiqing.test.functional.util.http
  */
 class RsqRestRequest {
     def headerMap = [:]
-    def body = [:]
+    def bodyMap = [:]
     def cookies = []
 
     def header(p1, p2){
@@ -13,7 +13,7 @@ class RsqRestRequest {
     }
 
     def fields(Map params){
-        body << params
+        bodyMap << params
 //        if(params instanceof Map){
 //            body = params.collect {
 //                "$it.key=$it.value"
@@ -22,7 +22,7 @@ class RsqRestRequest {
     }
 
     def field(p1, p2){
-        body[p1] = p2
+        bodyMap[p1] = p2
     }
 
     def cookies(cookieList){

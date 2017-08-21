@@ -1,6 +1,7 @@
 package com.rishiqing.demo
 
 import grails.test.spock.IntegrationSpec
+import grails.validation.ValidationException
 import org.hibernate.SessionFactory
 import spock.lang.Ignore
 import spock.lang.IgnoreRest
@@ -9,6 +10,8 @@ import spock.lang.Unroll
 
 class TodoServiceIntegrationSpec extends IntegrationSpec {
     static transactional = true
+
+    SessionFactory sessionFactory
 
     @Shared def todoDaoService
     @Shared def todoService
@@ -47,8 +50,7 @@ class TodoServiceIntegrationSpec extends IntegrationSpec {
 
     def cleanup() {}
 
-    @Unroll
-    void "todoService.getTodoMapList get result map is #todoMap, todo is #todo"() {
+    void "todoService.getTodoMapList get result map"() {
         when:
         List list = todoService.getTodoMapList()
 
@@ -61,7 +63,7 @@ class TodoServiceIntegrationSpec extends IntegrationSpec {
     }
 
     @Unroll
-    void "todoService.saveList should not throw exception with params is #params"(){
+    void "todoService.saveList should NOT throw exception with params is #params"(){
         when:
         todoService.saveList(params)
 
@@ -73,28 +75,55 @@ class TodoServiceIntegrationSpec extends IntegrationSpec {
                 null,
                 [],
                 [1,2,3],  //元素不为Map
-                [[title: 'asdf'],[aaa: 222]],  //元素的map中无id属性
-                [[id: 99999, title: 'random99999']]  //元素的id在数据库中不存在
         ]
     }
 
-    void "todoService.saveList should successfully save result when params is valid"(){
+    @Unroll
+    void "todoService.saveList should throw exception #exception with params is #params"(){
+        when:
+        todoService.saveList(params)
+
+        then:
+        def e = thrown(exception)
+
+        where:
+        params << [
+                [[title: 'asdf'],[aaa: 222]],  //元素的map中无id属性
+                [[id: 99999, title: 'random99999']]  //元素的id在数据库中不存在
+        ]
+        exception << [
+                ValidationException,
+                RuntimeException
+        ]
+    }
+
+    void "todoService.saveList should successfully save or update todo when params is valid"(){
         given:
         Map todo1Map = todo1.toMap()
         Map todo2Map = todo2.toMap()
         Map todo3Map = todo3.toMap()
+        Map newTodo1 = [title: "newTodo1 ${new Date()}"]
+        Map newTodo2 = [title: "newTodo2 ${new Date()}"]
 
 
         when:
         Map todo1MapChangeTitle = todo1Map + [title: "random${new Date()}"]
         Map todo2MapChangeIsDone = todo2Map + [isDone: !todo2Map.isDone]
         Map todo3MapChangeIsDeleted = todo3Map + [isDeleted: !todo3Map.isDeleted]
-        todoService.saveList([todo1MapChangeTitle, todo2MapChangeIsDone, todo3MapChangeIsDeleted])
+
+        def paramsList = [
+                todo1MapChangeTitle,
+                todo2MapChangeIsDone,
+                todo3MapChangeIsDeleted,
+                newTodo1,
+                newTodo2
+        ]
+        List resultList = todoService.saveList(paramsList)
         Todo todo1 = todoDaoService.getTodoById(Long.valueOf(todo1MapChangeTitle.id))
         Todo todo2 = todoDaoService.getTodoById(Long.valueOf(todo2MapChangeIsDone.id))
         Todo todo3 = todoDaoService.getTodoById(Long.valueOf(todo3MapChangeIsDeleted.id))
 
-        then:
+        then: 'compare with database'
         todo1.id == todo1MapChangeTitle.id
         todo1.title == todo1MapChangeTitle.title
         todo2.id == todo2MapChangeIsDone.id
@@ -102,6 +131,67 @@ class TodoServiceIntegrationSpec extends IntegrationSpec {
         todo3.id == todo3MapChangeIsDeleted.id
         todo3.isDone == todo3MapChangeIsDeleted.isDone
 
+        and: 'check result order'
+        resultList[0].id == paramsList[0].id
+        resultList[1].id == paramsList[1].id
+        resultList[2].id == paramsList[2].id
+        resultList[3].id != null
+        resultList[4].id != null
+
+    }
+
+    void "todoService.saveOrUpdateTodo should successfully save"(){
+        when:
+        String title = "new saved todo ${new Date()}"
+        Map result = todoService.saveOrUpdateTodo([title: title])
+
+        then:
+        result.id != null
+        result.title == title
+
+        when:
+        Todo todo = todoDaoService.getTodoById(result.id)
+
+        then:
+        todo.id == result.id
+        todo.title == result.title
+    }
+
+    void "todoService.saveOrUpdateTodo should successfully update title"(){
+        when:
+        String titleChanged = "titleChanged${new Date()}"
+        Map result = todoService.saveOrUpdateTodo([id: todo1.id, title: titleChanged])
+        Todo todo = todoDaoService.getTodoById(todo1.id)
+
+        then:
+        result.id == todo1.id
+        result.title == titleChanged
+        todo.id == todo1.id
+        todo.title == titleChanged
+    }
+    void "todoService.saveOrUpdateTodo should successfully update isDone"(){
+        when:
+        Date now = new Date()
+        Map result = todoService.saveOrUpdateTodo([id: todo1.id, isDone: true, doneTime: now.getTime()])
+        Todo todo = todoDaoService.getTodoById(todo1.id)
+
+        then:
+        result.id == todo1.id
+        result.isDone == true
+        result.doneTime == now.getTime()
+        todo.id == todo1.id
+        todo.isDone == true
+        todo.doneTime == now.getTime()
+    }
+
+    void "todoService.removeTodo should successfully remove"(){
+        when:
+        Map result = todoService.removeTodo([id: todo5.id])
+        Todo deletedTodo = todoDaoService.getTodoById(todo5.id)
+
+        then:
+        result.id == todo5.id
+        deletedTodo.isDeleted == true
     }
 
     @Ignore

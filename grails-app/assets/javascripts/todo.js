@@ -3,18 +3,54 @@
 
 // localStorage persistence
 var STORAGE_KEY = 'todos-vuejs-2.0'
+
+var isWatchTodos = true
+
+function watchTodos(){
+    return isWatchTodos
+}
 var todoStorage = {
-    fetch: function () {
-        var todos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
-        todos.forEach(function (todo, index) {
-            todo.id = index
-        })
-        todoStorage.uid = todos.length
-        return todos
+    fetchList: function (cb) {
+        Vue.http.get('/rsqTester/todo/fetchTodoList').then(function(res){
+            var json = res.body
+            cb(json.result)
+        }, function(err){
+            alert('error...')
+        });
+        // return;
+        // var todos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+        // todos.forEach(function (todo, index) {
+        //     todo.id = index
+        // })
+        // todoStorage.uid = todos.length
+        // return todos
     },
-    save: function (todos) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
+    save: function(todo, cb){
+        Vue.http.post('/rsqTester/todo/saveTodo', todo).then(function(res){
+            var json = res.body
+            cb(json.result)
+        }, function(err){
+            alert('error...')
+        });
+    },
+    remove: function(todo, cb){
+        Vue.http.post('/rsqTester/todo/removeTodo', todo).then(function(res){
+            var json = res.body
+            cb(json.result)
+        }, function(err){
+            alert('error...')
+        });
     }
+    // save: function (todos) {
+    //     Vue.http.post('/rsqTester/todo/saveTodoList', {list: todos}).then(function(res){
+    //         var json = res.body
+    //         app.todos = json.result
+    //         app.toSync = false
+    //     }, function(err){
+    //         alert('error...')
+    //     });
+    //     // localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
+    // }
 }
 
 // visibility filters
@@ -24,12 +60,12 @@ var filters = {
     },
     active: function (todos) {
         return todos.filter(function (todo) {
-            return !todo.completed
+            return !todo.isDone
         })
     },
     completed: function (todos) {
         return todos.filter(function (todo) {
-            return todo.completed
+            return todo.isDone
         })
     }
 }
@@ -38,20 +74,23 @@ var filters = {
 var app = new Vue({
     // app initial state
     data: {
-        todos: todoStorage.fetch(),
+        todos: [],
         newTodo: '',
         editedTodo: null,
-        visibility: 'all'
+        visibility: 'all',
+        toSync: false
     },
 
     // watch todos change for localStorage persistence
     watch: {
-        todos: {
-            handler: function (todos) {
-                todoStorage.save(todos)
-            },
-            deep: true
-        }
+        // todos: {
+        //     handler: function (todos) {
+        //         if(this.toSync){
+        //             todoStorage.save(todos)
+        //         }
+        //     },
+        //     deep: true
+        // }
     },
 
     // computed properties
@@ -69,7 +108,7 @@ var app = new Vue({
             },
             set: function (value) {
                 this.todos.forEach(function (todo) {
-                    todo.completed = value
+                    todo.isDone = value
                 })
             }
         }
@@ -89,16 +128,22 @@ var app = new Vue({
             if (!value) {
                 return
             }
-            this.todos.push({
-                id: todoStorage.uid++,
+            var obj = {
                 title: value,
-                completed: false
+                isDone: false
+            }
+            var that = this
+            todoStorage.save(obj, function(todo){
+                that.todos.push(todo)
             })
             this.newTodo = ''
         },
 
         removeTodo: function (todo) {
-            this.todos.splice(this.todos.indexOf(todo), 1)
+            var that = this
+            todoStorage.remove(todo, function(){
+                that.todos.splice(that.todos.indexOf(todo), 1)
+            })
         },
 
         editTodo: function (todo) {
@@ -115,6 +160,16 @@ var app = new Vue({
             if (!todo.title) {
                 this.removeTodo(todo)
             }
+            todoStorage.save(todo, function(){});
+        },
+
+        doneTodo: function(todo){
+            var newTodo = JSON.parse(JSON.stringify(todo))
+            newTodo.isDone = !todo.isDone
+
+            todoStorage.save(newTodo, function(dbTodo){
+                todo.isDone = dbTodo.isDone
+            })
         },
 
         cancelEdit: function (todo) {
@@ -123,7 +178,12 @@ var app = new Vue({
         },
 
         removeCompleted: function () {
-            this.todos = filters.active(this.todos)
+            var doneList = filters.completed(this.todos)
+            var that = this
+            doneList.forEach(function(todo){
+                that.removeTodo(todo)
+            })
+            // this.todos = filters.active(this.todos)
         }
     },
 
@@ -155,3 +215,7 @@ onHashChange()
 
 // mount
 app.$mount('.todoapp')
+
+todoStorage.fetchList(function(list){
+    app.todos = list
+})

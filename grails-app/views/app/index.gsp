@@ -5,6 +5,7 @@
     <asset:stylesheet src="base.css" />
     <asset:stylesheet src="todo.css" />
     <asset:javascript src="vue.min.js" />
+    <asset:javascript src="vue-resource.js" />
 </head>
 
 <body>
@@ -23,9 +24,9 @@
             <li v-for="todo in filteredTodos"
                 class="todo"
                 :key="todo.id"
-                :class="{ completed: todo.completed, editing: todo == editedTodo }">
+                :class="{ completed: todo.isDone, editing: todo == editedTodo }">
                 <div class="view">
-                    <input class="toggle" type="checkbox" v-model="todo.completed">
+                    <input class="toggle" type="checkbox" @click="doneTodo(todo)">
                     <label @dblclick="editTodo(todo)">{{ todo.title }}</label>
                     <button class="destroy" @click="removeTodo(todo)"></button>
                 </div>
@@ -45,7 +46,7 @@
         <ul class="filters">
             <li><a href="#/all" :class="{ selected: visibility == 'all' }">All</a></li>
             <li><a href="#/active" :class="{ selected: visibility == 'active' }">Active</a></li>
-            <li><a href="#/completed" :class="{ selected: visibility == 'completed' }">Completed</a></li>
+            <li><a href="#/completed" :class="{ selected: visibility == 'isDone' }">Completed</a></li>
         </ul>
         <button class="clear-completed" @click="removeCompleted" v-show="todos.length > remaining">
             Clear completed

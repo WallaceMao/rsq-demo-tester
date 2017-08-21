@@ -12,6 +12,7 @@ import spock.lang.Ignore
  * 微信登录
  * Created by  on 2017/8/16.Wallace
  */
+@Ignore
 class WeixinLoginSpec extends GebSpec {
     def setup(){}
     def cleanup(){}

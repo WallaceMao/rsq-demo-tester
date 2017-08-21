@@ -1,9 +1,13 @@
 package com.rishiqing.test.functional.util.http
 
 import com.mashape.unirest.http.HttpResponse
+import com.mashape.unirest.http.JsonNode
 import com.mashape.unirest.http.Unirest
+import com.mashape.unirest.request.GetRequest
 import com.mashape.unirest.request.HttpRequest
 import com.mashape.unirest.request.HttpRequestWithBody
+import grails.converters.JSON
+import groovy.json.JsonOutput
 import org.apache.http.HttpHost
 import org.apache.http.client.CookieStore
 import org.apache.http.cookie.Cookie
@@ -18,11 +22,13 @@ import org.apache.http.impl.cookie.BasicClientCookie
  */
 class RsqRestUtil {
 
+    static final String DEFAULT_CONTENT_TYPE = 'application/json'
+
     static CookieStore cookieStore
 
     static {
-        config()
-//        config([proxy: ['127.0.0.1': 5555]])
+//        config()
+        config([proxy: ['127.0.0.1': 5555]])
     }
 
     static void config(Map settings = [:]) {
@@ -39,6 +45,63 @@ class RsqRestUtil {
         Unirest.setHttpClient(builder.build())
     }
 
+    static RsqRestResponse get(String url, @DelegatesTo(RsqRestRequest) Closure closure){
+        RsqRestRequest delegateRequest = new RsqRestRequest()
+        def code = closure.rehydrate(delegateRequest, this, this)
+        code.resolveStrategy = Closure.DELEGATE_ONLY
+        code()
+
+        doGet(url, delegateRequest)
+    }
+
+
+    static RsqRestResponse post(String url, @DelegatesTo(RsqRestRequest) Closure closure){
+        RsqRestRequest delegateRequest = new RsqRestRequest()
+        def code = closure.rehydrate(delegateRequest, this, this)
+        code.resolveStrategy = Closure.DELEGATE_ONLY
+        code()
+
+        doPost(url, delegateRequest)
+    }
+
+    static RsqRestResponse postJSON(String url, @DelegatesTo(RsqRestRequest) Closure closure){
+        RsqRestRequest delegateRequest = new RsqRestRequest()
+        def code = closure.rehydrate(delegateRequest, this, this)
+        code.resolveStrategy = Closure.DELEGATE_ONLY
+        code()
+
+        if(!delegateRequest.headerMap['content-type'] && !delegateRequest.headerMap['Content-Type']){
+            delegateRequest.header('content-type', DEFAULT_CONTENT_TYPE)
+        }
+
+        return doPost(url, delegateRequest)
+    }
+
+    static private RsqRestResponse doGet(String url, RsqRestRequest delegateRequest){
+        HttpRequest unirestReq = Unirest.get(url)
+
+        handleHeader(unirestReq, delegateRequest)
+        handleCookie(delegateRequest)
+
+        HttpResponse<String> response = unirestReq.asString()
+        println response.body
+
+        new RsqRestResponse(response)
+    }
+
+    static private RsqRestResponse doPost(String url, RsqRestRequest delegateRequest){
+        //  use Unirest to send request
+        HttpRequestWithBody unirestReq = Unirest.post(url)
+
+        handleHeader(unirestReq, delegateRequest)
+        handleBody(unirestReq, delegateRequest)
+        handleCookie(delegateRequest)
+
+        HttpResponse<String> response = unirestReq.asString()
+
+        new RsqRestResponse(response)
+    }
+
     static private HttpRequest handleHeader(HttpRequest request, RsqRestRequest delegateRequest){
         delegateRequest.headerMap.each {key, value ->
             request = request.header(String.valueOf(key), String.valueOf(value))
@@ -47,7 +110,18 @@ class RsqRestUtil {
     }
 
     static private HttpRequestWithBody handleBody(HttpRequestWithBody request, RsqRestRequest delegateRequest){
-        request.fields(delegateRequest.body)
+        // 根据header判断body的格式，目前支持"application/x-www-form-urlencoded"和"application/json"两种，默认为"application/json"
+        def map = delegateRequest.headerMap
+        String headerValue = map['content-type'] ?: map['Content-Type'] ?: DEFAULT_CONTENT_TYPE
+
+        if(headerValue.indexOf('application/x-www-form-urlencode') != -1){
+            request.fields(delegateRequest.bodyMap)
+        }else if(headerValue.indexOf('application/json') != -1){
+            String str = JsonOutput.toJson(delegateRequest.bodyMap)
+            request.body(str)
+        }else{
+            throw new RuntimeException("unsupported http Content-Type header")
+        }
         return request
     }
 
@@ -64,27 +138,6 @@ class RsqRestUtil {
                 throw new RuntimeException("cookie type not supported")
             }
         }
-    }
-
-
-    static RsqRestResponse post(String url, @DelegatesTo(RsqRestRequest) Closure closure){
-        RsqRestRequest delegateRequest = new RsqRestRequest()
-        def code = closure.rehydrate(delegateRequest, this, this)
-        code.resolveStrategy = Closure.DELEGATE_ONLY
-        code()
-
-        //  use Unirest to send request
-        HttpRequestWithBody unirestReq = Unirest.post(url)
-
-        handleHeader(unirestReq, delegateRequest)
-        handleBody(unirestReq, delegateRequest)
-        handleCookie(delegateRequest)
-
-        HttpResponse<String> response = unirestReq.asString()
-
-        RsqRestResponse resp = new RsqRestResponse(response)
-
-        return resp
     }
 
     /**
