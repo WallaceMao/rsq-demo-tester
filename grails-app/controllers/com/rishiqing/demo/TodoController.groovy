@@ -12,7 +12,6 @@ class TodoController {
         def m
         try {
             List list = todoService.getTodoMapList()
-            Thread.sleep(1000)
             m = [errcode: 0, result: list]
         }catch (Exception e){
             log.error(e)
