@@ -5,7 +5,7 @@ grails单元测试是针对编写的单个类方法进行测试，其所依赖�
 grails单元测试一般由开发人员编写，对单个业务逻辑复杂的类进行
 
 ### 单元测试代码编写
-参照unit包中 `com.rishiqing.demo.dao.TodoDaoServiceSpec.groovy`
+参照unit包中 [com.rishiqing.demo.dao.TodoDaoServiceSpec.groovy](https://github.com/WallaceMao/rsq-demo-tester/blob/master/test/unit/com/rishiqing/demo/dao/TodoDaoServiceSpec.groovy)
 
 ### 执行单元测试
 #### IDEA环境下
@@ -36,7 +36,7 @@ grails集成测试默认情况下对每个测试类开启transactional，提交�
     }
 
 #### 集成测试代码编写
-参照integration中`com.rishiqing.demo.TodoServiceIntegrationSpec.groovy`
+参照integration中[com.rishiqing.demo.TodoServiceIntegrationSpec.groovy](https://github.com/WallaceMao/rsq-demo-tester/blob/master/test/unit/com/rishiqing/demo/TodoServiceIntegrationSpec.groovy)
 
 #### 执行集成测试
 #### IDEA环境下（无效）
@@ -127,7 +127,7 @@ api测试不调用web driver，直接通过封装过的[Unirest库](http://unire
     }
 
 #### api测试代码编写
-参照`com.rishiqing.demo.api.TodoFunctionalSpec.groovy`
+参照[com.rishiqing.demo.api.TodoFunctionalSpec.groovy](https://github.com/WallaceMao/rsq-demo-tester/blob/master/test/unit/com/rishiqing/demo/api/TodoFunctionalSpec.groovy)
 
 #### 执行api测试
 运行测试的方式有两种：
@@ -163,7 +163,7 @@ api测试不调用web driver，直接通过封装过的[Unirest库](http://unire
     }
     
 #### web功能测试代码编写
-参照`com.rishiqing.demo.web.TodoWebFunctionalSpec.groovy`
+参照[com.rishiqing.demo.web.TodoWebFunctionalSpec.groovy](https://github.com/WallaceMao/rsq-demo-tester/blob/master/test/unit/com/rishiqing/demo/web/TodoWebFunctionalSpec.groovy)
 
 #### 执行dweb功能测试代码
 运行测试的方式有两种：
@@ -190,5 +190,5 @@ api测试不调用web driver，直接通过封装过的[Unirest库](http://unire
 
 ## 4 更多例子
 
-1. 用户名密码验证：functional: `com.rishiqing.test.functional.rest.spec.account.ValidateUserSpec.groovy`
-2. 微信登录：web functional: `com.rishiqing.test.functional.web.spec.WeixinLoginSpec.groovy`
+1. 用户名密码验证：functional: [com.rishiqing.test.functional.rest.spec.account.ValidateUserSpec.groovy](https://github.com/WallaceMao/rsq-demo-tester/blob/master/test/functional/com/rishiqing/test/functional/rest/spec/account/ValidateUserSpec.groovy)
+2. 微信登录：web functional: [com.rishiqing.test.functional.web.spec.WeixinLoginSpec.groovy](https://github.com/WallaceMao/rsq-demo-tester/blob/master/test/functional/com/rishiqing/test/functional/web/spec/WeixinLoginSpec.groovy)
